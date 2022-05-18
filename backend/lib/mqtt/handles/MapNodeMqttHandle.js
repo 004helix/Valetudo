@@ -173,10 +173,15 @@ class MapNodeMqttHandle extends NodeMqttHandle {
         if (this.robot.state.map === null || !(this.controller.currentConfig.customizations.provideMapData ?? true) || !this.controller.isInitialized()) {
             return null;
         }
-        const robot = this.robot;
+        const map = { ...this.robot.state.map };
+
+        if (map.metaData?.nonce) {
+            map.metaData = { ...map.metaData };
+            delete map.metaData.nonce;
+        }
 
         const promise = new Promise((resolve, reject) => {
-            zlib.deflate(JSON.stringify(robot.state.map), (err, buf) => {
+            zlib.deflate(JSON.stringify(map), (err, buf) => {
                 if (err !== null) {
                     return reject(err);
                 }
